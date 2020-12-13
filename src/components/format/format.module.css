@@ -1,0 +1,19 @@
+.icon {
+  margin-right: 8px;
+}
+
+.number, .balance {
+  white-space: nowrap;
+}
+
+.number, .balance :global(.primary) {
+  color: var(--color-primary);
+}
+
+.number, .balance :global(.error) {
+  color: var(--color-error);
+}
+
+.number, .balance :global(.success) {
+  color: var(--color-success);
+}
