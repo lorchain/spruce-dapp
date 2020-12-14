@@ -2,7 +2,8 @@ import React, { FC, useCallback, useState, useEffect } from 'react';
 import { Modal } from 'antd';
 import { useSetting } from '../hooks';
 import Radio from './Radio';
-import { EndpointConfigItem, EndpointType } from './Environment/configs/endpoints';
+// import { EndpointConfigItem, EndpointType } from './Environment/configs/endpoints';
+import { EndpointConfigItem, EndpointType } from '../config/endpoints';
 
 // import './SelectNetwork.css';
 // import classes from './SelectNetwork.module.scss';

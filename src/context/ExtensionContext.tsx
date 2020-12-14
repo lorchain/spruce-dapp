@@ -1,13 +1,14 @@
 import React, { ReactNode, createContext, FC, useCallback, useEffect, useState, useReducer, useMemo } from 'react';
 import { isNumber } from 'lodash';
 import { InjectedAccount, InjectedExtension, MetadataDef } from '@polkadot/extension-inject/types';
-import { ApiRx } from '@polkadot/api';
+// import { ApiRx } from '@polkadot/api';
+import { ApiPromise } from '@polkadot/api';
 import { web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 // import { options } from '@acala-network/api';
-import { options } from '../../config/NetworkConfig';
+import { options } from '../config/network';
 
-import { NoAccounts, NoExtensions, SelectAccount, UploadMetadata } from '../../components';
-import { useModal, useApi, useStorage } from '../../hooks';
+import { NoAccounts, NoExtensions, SelectAccount, UploadMetadata } from '../components';
+import { useModal, useApi, useStorage } from '../hooks';
 
 
 type AddressBook = {
@@ -29,7 +30,7 @@ export interface ExtensionData {
 
 export const ExtensionContext = createContext<ExtensionData>({} as any);
 
-async function getExtensions (api: ApiRx, appName: string): Promise<InjectedExtension> {
+async function getExtensions (api: ApiPromise, appName: string): Promise<InjectedExtension> {
   const extensions = await web3Enable(appName);
 
   if (extensions.length === 0) throw new Error('no_extensions');

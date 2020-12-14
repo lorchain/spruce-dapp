@@ -1,8 +1,8 @@
 import React, { createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
-import { useModal, useTranslation } from '../../hooks';
+import { useModal, useTranslation } from '../hooks';
 
-import { DEFAULT_ENDPOINTS, EndpointConfig } from './configs/endpoints';
+import { DEFAULT_ENDPOINTS, EndpointConfig } from '../config/endpoints';
 
 export type Language = 'zh' | 'en';
 export type Theme = 'normal' | 'dark';

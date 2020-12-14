@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { ApiContext, ApiContextData } from '../components';
+import { ApiContext, ApiContextData } from '../context';
 
 /**
  * @name useApi

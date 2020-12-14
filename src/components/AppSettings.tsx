@@ -2,7 +2,8 @@ import React, { FC, useCallback } from 'react';
 import { Drawer } from 'antd';
 
 import { useSetting } from '../hooks';
-import { DEFAULT_ENDPOINTS } from '../components/Environment/configs/endpoints';
+// import { DEFAULT_ENDPOINTS } from '../components/Environment/configs/endpoints';
+import { DEFAULT_ENDPOINTS } from '../config/endpoints';
 // import { Radio, CloseIcon } from '../components';
 import { Radio } from '../components';
 import { CloseOutlined } from '@ant-design/icons';

@@ -1,100 +1,135 @@
-import React, { Dispatch, useReducer } from 'react';
-import PropTypes from 'prop-types';
-import jsonrpc from '@polkadot/types/interfaces/jsonrpc';
-import * as queryString from 'query-string';
-import config from '../config/ChainConfig';
+import React, { ReactNode, FC, useState, useEffect, useCallback, useRef } from 'react';
+import { Subscription } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 
-const parsedQuery = queryString.parse(window.location.search);
-const connectedSocket = parsedQuery.rpc || config.PROVIDER_SOCKET;
-console.log(`Connected socket: ${connectedSocket}`);
+import { ApiPromise, WsProvider } from '@polkadot/api';
+// import { options } from '@acala-network/api';
+import { options } from '../config/network';
 
-export interface IState {
-  socket: any,
-  jsonrpc: any,
-  types: any,
-  keyring: any,
-  keyringState: any,
-  api: any,
-  apiError: any,
-  apiState: any
+const MAX_CONNECT_TIME = 1000 * 60; // one minute
+
+export interface ApiContextData {
+  api: ApiPromise;
+  connected: boolean;
+  error: boolean;
+  loading: boolean;
+  chainInfo: {
+    chainName: string;
+  };
+  init: (endpoint: string, allEndpoint: string[]) => void; // connect to network
 }
 
-interface Actions {
-  type: string;
-  payload: any;
+// ensure that api always exist
+export const ApiContext = React.createContext<ApiContextData>({} as ApiContextData);
+
+interface Props {
+  children: ReactNode;
 }
 
-interface IContextProps {
-  state: IState;
-  dispatch: Dispatch<Actions>;
-}
+/**
+ * @name ApiProvider
+ * @description context provider to support initialized api and chain information
+ */
+export const ApiProvider: FC<Props> = ({
+  children
+}) => {
+  console.log('api provider');
+  // api instance
+  const [api, setApi] = useState<ApiPromise>({} as ApiPromise);
 
-const defaultState: IState = {
-// const initialState: IState = {
-  socket: connectedSocket,
-  jsonrpc: { ...jsonrpc, ...config.RPC },
-  types: config.CUSTOM_TYPES,
-  keyring: null,
-  keyringState: null,
-  api: null,
-  apiError: null,
-  apiState: null
-};
+  // chain information
+  const [chainName, setChainName] = useState<string>('');
 
-// const reducer: Reducer<IState, Actions> = (state, action) => {
-const reducer = (state: IState, action: Actions) => {
-  let socket = null;
+  // status
+  const [connected, setConnected] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  // const apiSubscriber = useRef<Subscription>();
 
-  console.log('111 state', state);
-  console.log('222 action', action);
-  switch (action.type) {
-    case 'RESET_SOCKET':
-      socket = action.payload || state.socket;
-      return { ...state, socket, api: null, apiState: null };
+  const init = useCallback((endpoint: string, allEndpoints: string[]) => {
+    console.log('111');
+    console.log('api', api);
+    // if (apiSubscriber.current) return;
+    // if (api) {
+    //   return;
+    // }
+    console.log('222');
+    console.log('endpoint', endpoint);
+    console.log('allEndpoints', allEndpoints);
 
-    case 'CONNECT':
-      return { ...state, api: action.payload, apiState: 'CONNECTING' };
+    const provider = new WsProvider([endpoint, ...allEndpoints]);
 
-    case 'CONNECT_SUCCESS':
-      return { ...state, apiState: 'READY' };
+    ApiPromise.create(options({ provider }))
+      .then((result) => {
+        console.log('result', result);
+        setApi(result);
+        setConnected(true);
+        setError(false);
+        setLoading(false);
+      })
+      .catch(() => {
+        console.log('error');
+        setConnected(false);
+        setError(true);
+        setLoading(false);
+      });
 
-    case 'CONNECT_ERROR':
-      return { ...state, apiState: 'ERROR', apiError: action.payload };
+    // apiSubscriber.current = ApiRx.create(options({ provider })).pipe(
+    //   timeout(MAX_CONNECT_TIME)
+    // ).subscribe({
+    //   error: (): void => {
+    //     setConnected(false);
+    //     setError(true);
+    //     setLoading(false);
+    //   },
+    //   next: (result): void => {
+    //     setApi(result);
+    //     setConnected(true);
+    //     setError(false);
+    //     setLoading(false);
+    //   }
+    // });
+  }, []);
 
-    case 'SET_KEYRING':
-      return { ...state, keyring: action.payload, keyringState: 'READY' };
+  useEffect(() => {
+    if (!connected) return;
 
-    case 'KEYRING_ERROR':
-      return { ...state, keyring: null, keyringState: 'ERROR' };
+    api.rpc.system.chain().then((result) => {
+      setChainName(result.toString());
+    });
+  }, [api, connected]);
 
-    default:
-      throw new Error(`Unknown type: ${action.type}`);
-  }
-};
+  useEffect(() => {
+    if (!connected) return;
 
-const ApiContext = React.createContext({} as IContextProps);
+    api.on('disconnected', () => {
+      setConnected(false);
+      setError(false);
+    });
+    api.on('error', () => {
+      setConnected(false);
+      setError(true);
+    });
+    api.on('connected', () => {
+      setConnected(true);
+      setError(false);
+    });
+  }, [api, connected, error]);
 
-const ApiContextProvider = (props: any) => {
-  // filtering props and merge with default param value
-  const initialState: any = { ...defaultState };
-  const neededPropNames = ['socket', 'types'];
-  neededPropNames.forEach(key => {
-    initialState[key] = (typeof props[key] === 'undefined' ? initialState[key] : props[key]);
-  });
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  const value = { state, dispatch };
   return (
-    <ApiContext.Provider value={value}>
-      {props.children}
+    <ApiContext.Provider
+      value={{
+        api,
+        chainInfo: {
+          chainName
+        },
+        connected,
+        error,
+        init,
+        loading
+      }}
+    >
+      {children}
     </ApiContext.Provider>
   );
 };
-
-// prop typechecking
-ApiContextProvider.propTypes = {
-  socket: PropTypes.string,
-  types: PropTypes.object
-};
-
-export { ApiContext, ApiContextProvider };

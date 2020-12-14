@@ -3,7 +3,7 @@ import React, { FC, lazy, Suspense } from 'react';
 import { PageContentLoading } from '../components';
 
 import { Layout } from '../components';
-import { sideBarConfig } from './SidebarConfig';
+import { sidebarConfig } from './sidebarConfig';
 import { RouterConfigData } from  '../components';
 
 const PageMarketplace = lazy(() => import('../pages/Marketplace'));
@@ -20,7 +20,7 @@ const CSuspense: FC = ({ children }) => {
   );
 };
 
-export const config: RouterConfigData[] = [
+export const routerConfig: RouterConfigData[] = [
   {
     children: [
       {
@@ -43,7 +43,7 @@ export const config: RouterConfigData[] = [
         redirectTo: 'marketplace'
       }
     ],
-    element: <Layout sidebar={sideBarConfig}/>,
+    element: <Layout sidebar={sidebarConfig}/>,
     path: '*'
   }
 ];

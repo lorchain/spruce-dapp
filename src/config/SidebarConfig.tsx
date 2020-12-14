@@ -10,7 +10,7 @@ import { ReactComponent as GuideIcon } from '../assets/guide.svg';
 import { ReactComponent as FaucetIcon } from '../assets/faucet.svg';
 import { SidebarConfig } from '../components/Sidebar';
 
-export const sideBarConfig: SidebarConfig = {
+export const sidebarConfig: SidebarConfig = {
   products: [
     {
       icon: <GovernanceIcon />,

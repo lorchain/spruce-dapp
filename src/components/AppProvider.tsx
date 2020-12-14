@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 
-import { ConnectStatus, AppSettings } from '../../components';
-import { BareProps } from '../../components/types';
+import { ConnectStatus, AppSettings } from '../components';
+import { BareProps } from '../components/types';
 
-import { ApiProvider } from './ApiProvider';
-import { SettingProvider } from './SettingProvider';
+import { ApiProvider, SettingProvider, ExtensionProvider } from '../context';
+// import { SettingProvider } from './SettingContext';
 // import { RxStoreProvider } from './RxStore';
 // import { StoreProvier } from './store';
-import { ExtensionProvider } from './ExtensionProvider';
+// import { ExtensionProvider } from './ExtensionContext';
 
 interface AppProviderProps extends BareProps {
   applicationName: string;
