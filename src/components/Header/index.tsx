@@ -1,7 +1,7 @@
 import React from 'react';
 import { MenuOutlined, SearchOutlined } from '@ant-design/icons';
 import { Input } from 'antd';
-import { ChainName } from '../ChainName';
+import ChainName from '../ChainName';
 import { AccountBar } from '../AccountBar';
 import './index.css';
 

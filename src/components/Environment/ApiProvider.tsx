@@ -74,7 +74,7 @@ export const ApiProvider: FC<Props> = ({
         setLoading(false);
       });
 
-    // apiSubscriber.current = ApiPromise.create(options({ provider })).pipe(
+    // apiSubscriber.current = ApiRx.create(options({ provider })).pipe(
     //   timeout(MAX_CONNECT_TIME)
     // ).subscribe({
     //   error: (): void => {

@@ -1,16 +1,17 @@
 import React, { FC, useCallback, useState, useEffect } from 'react';
 import { Modal } from 'antd';
 import { useSetting } from '../hooks';
-import { Radio } from './Radio';
+import Radio from './Radio';
 import { EndpointConfigItem, EndpointType } from './Environment/configs/endpoints';
 
 // import './SelectNetwork.css';
-import classes from './SelectNetwork.module.scss';
+// import classes from './SelectNetwork.module.scss';
+import styled from 'styled-components';
 
-export interface SelectNetworkProps {
-  visiable: boolean;
-  onClose: () => void;
-}
+// export interface SelectNetworkProps {
+//   visiable: boolean;
+//   onClose: () => void;
+// }
 
 const TypeNameMap: Record<EndpointType, string> = {
   development: 'Development',
@@ -18,10 +19,19 @@ const TypeNameMap: Record<EndpointType, string> = {
   testnet: 'Test Networks'
 };
 
-export const SelectNetwork: FC<SelectNetworkProps> = ({
-  onClose,
-  visiable
-}) => {
+interface Props {
+  className?: string;
+  visiable: boolean;
+  onClose: () => void;
+}
+
+function SelectNetwork ({ className = '', visiable, onClose }: Props): React.ReactElement<Props> | null {
+
+
+// export const SelectNetwork: FC<SelectNetworkProps> = ({
+//   onClose,
+//   visiable
+// }) => {
   const { changeEndpoint, endpoint, selectableEndpoints } = useSetting();
   const [selected, setSelected] = useState<string>('');
 
@@ -30,15 +40,15 @@ export const SelectNetwork: FC<SelectNetworkProps> = ({
 
     return (
       <div
-        className={classes.endpoint}
+        className={className}
         key={`select-endpoint-type-${type}`}
       >
-        <p className={classes.endpointType}>{TypeNameMap[type]}</p>
-        <ul className={classes.endpointList}>
+        <p className='endpointType'>{TypeNameMap[type]}</p>
+        <ul className='endpointList'>
           {
             endpoints.map((config) => (
               <li
-                className={classes.endpointItem}
+                className='endpointItem'
                 key={`select-endpoint-${config.url}`}
                 onClick={(): void => setSelected(config.url)}
               >
@@ -52,7 +62,7 @@ export const SelectNetwork: FC<SelectNetworkProps> = ({
         </ul>
       </div>
     );
-  }, [selected, setSelected]);
+  }, [selected, setSelected, className]);
 
   const handleSelect = useCallback(() => {
     changeEndpoint(selected);
@@ -95,4 +105,36 @@ export const SelectNetwork: FC<SelectNetworkProps> = ({
       }
     </Modal>
   );
-};
+}
+
+export default React.memo(styled(SelectNetwork)`
+  margin-bottom: 24px;
+
+  .endpointType {
+    margin-bottom: 16px;
+    font-size: 16px;
+    line-height: 19px;
+    color: var(--text-color-primary);
+  }
+
+  .endpointList {
+    list-style: none;
+  }
+
+  .endpointItem {
+    width: 100%;
+    height: 48px;
+
+    padding: 0 16px;
+    margin-bottom: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    border: 1px solid var(--border-color);
+    border-radius: 2px;
+
+    cursor: pointer;
+  }
+`);

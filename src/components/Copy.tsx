@@ -6,22 +6,33 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { notification } from 'antd';
 import { BareProps } from './types';
 // import './Copy.css';
-import classes from './Copy.module.scss';
+// import classes from './Copy.module.scss';
+import styled from 'styled-components';
 
-interface Props extends BareProps {
+// interface Props extends BareProps {
+//   text: string;
+//   display?: string;
+//   render?: () => ReactNode;
+//   withCopy?: boolean;
+// }
+
+interface Props {
+  className?: string;
   text: string;
   display?: string;
   render?: () => ReactNode;
   withCopy?: boolean;
 }
 
-export const Copy: FC<Props> = ({
-  className,
-  display,
-  render,
-  text,
-  withCopy = true
-}) => {
+function Copy ({ className = '', display, render, text, withCopy = true }: Props): React.ReactElement<Props> | null {
+
+// export const Copy: FC<Props> = ({
+//   className,
+//   display,
+//   render,
+//   text,
+//   withCopy = true
+// }) => {
   const handleCopy = useCallback((): void => {
     notification.success({
       message: display || `copy ${text} success`
@@ -30,7 +41,7 @@ export const Copy: FC<Props> = ({
 
   if (withCopy) {
     return (
-      <span className={clsx(classes.root, className)}>
+      <span className={className}>
         { render ? render() : text }
         {
           withCopy ? (
@@ -51,10 +62,21 @@ export const Copy: FC<Props> = ({
       onCopy={handleCopy}
       text={text}
     >
-      <span className={clsx(classes.root, className)}>
+      <span className={className}>
         { render ? render() : text }
         { withCopy ? <CopyOutlined style={{ marginLeft: 6 }} /> : null }
       </span>
     </CopyToClipboard>
   );
-};
+}
+
+export default React.memo(styled(Copy)`
+  display: flex;
+  align-items: center;
+
+  > svg {
+    margin-left: 8px;
+    width: 16px;
+    cursor: pointer;
+  }
+`);

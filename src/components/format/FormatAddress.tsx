@@ -1,7 +1,7 @@
 import React, { FC, memo, useMemo, useCallback } from 'react';
 
 import { BareProps } from '../types';
-import { Copy } from '../Copy';
+import { Copy } from '../../components';
 import Identicon from '@polkadot/react-identicon';
 
 import { formatAddress } from '../utils';

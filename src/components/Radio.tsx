@@ -1,7 +1,15 @@
 import React, { FC, memo, InputHTMLAttributes, ReactNode } from 'react';
-import clsx from 'clsx';
-import classes from './Radio.module.scss';
+// import clsx from 'clsx';
+// import classes from './Radio.module.scss';
+import styled from 'styled-components';
 // import './Radio.css';
+
+// interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
+//   className?: string;
+//   label?: ReactNode;
+//   checked?: boolean;
+//   onClick?: () => void;
+// }
 
 interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   className?: string;
@@ -10,14 +18,17 @@ interface Props extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   onClick?: () => void;
 }
 
-export const Radio: FC<Props> = memo(({
-  checked = false,
-  className,
-  disabled,
-  label,
-  onClick,
-  ...other
-}) => {
+function Radio ({ className = '', checked = false, disabled, label, onClick, ...other }: Props): React.ReactElement<Props> | null {
+
+
+// export const Radio: FC<Props> = memo(({
+//   checked = false,
+//   className,
+//   disabled,
+//   label,
+//   onClick,
+//   ...other
+// }) => {
   const _onClick = (): void => {
     if (disabled) {
       return;
@@ -28,27 +39,87 @@ export const Radio: FC<Props> = memo(({
 
   return (
     <div
-      className={
-        clsx(
-          classes.root,
-          className,
-          {
-            [classes.checked]: checked,
-            [classes.disabled]: disabled
-          }
-        )
-      }
+      className={`ui--Radio${checked ? ' checked' : ''}${disabled ? ' disabled' : ''} ${className}`}
       onClick={_onClick}
     >
-      <span className={classes.radio}>
+      <span className='radio'>
         <input
-          className={classes.input}
+          className='input'
           {...other}
         />
       </span>
-      {label ? <div className={classes.label}>{label}</div> : null}
+      {label ? <div className='label'>{label}</div> : null}
     </div>
   );
-});
+}
 
 Radio.displayName = 'Radio';
+
+export default React.memo(styled(Radio)`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  &.checked {
+    .radio {
+      border-color: var(--color-primary);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 6px;
+        height: 6px;
+        border-radius: 100%;
+        background: var(--color-primary);
+        transform: translate3d(-50%, -50%, 0);
+      }
+    }
+  }
+
+  &.disabled {
+    cursor: not-allowed;
+
+    .radio {
+      border-color: #E9E9E9;
+      background: #eeeeee;
+
+      &::after {
+        display: none;
+      }
+    }
+
+    .label {
+      margin-left: 12px;
+      color: var(--text-color-second);
+    }
+  }
+
+  .radio {
+    display: block;
+    box-sizing: border-box;
+    position: relative;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d9d9d9;
+    border-radius: 100%;
+  }
+
+  .input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    opacity: 0;
+  }
+
+  .label {
+    margin-left: 12px;
+    font-size: 16px;
+    line-height: 18px;
+    color: #666666;
+  }
+`);

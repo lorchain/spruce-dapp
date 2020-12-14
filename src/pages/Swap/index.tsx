@@ -20,7 +20,9 @@ function Swap ({ children, className = '' }: Props): React.ReactElement<Props> |
   return (
     <div className={`ui--Swap padded ${className}`}>
       <div className='ui--Swap-page'>
-        <h1>Page swap</h1>
+        <div className='text'>
+          <h1>Page swap</h1>
+        </div>
       </div>
     </div>
   );
@@ -33,6 +35,8 @@ export default React.memo(styled(Swap)`
     padding: 20px 60px;
   }
   .ui--Swap-page {
-    background: var(--color-primary);
+    .text {
+      background: red;
+    }
   }
 `);

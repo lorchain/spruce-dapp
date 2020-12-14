@@ -7,8 +7,9 @@ import { DEFAULT_ENDPOINTS } from '../components/Environment/configs/endpoints';
 import { Radio } from '../components';
 import { CloseOutlined } from '@ant-design/icons';
 
-import classes from './AppSettings.module.scss';
+// import classes from './AppSettings.module.scss';
 // import './AppSettings.css';
+import styled from 'styled-components';
 
 const LanguageConfig = [
   {
@@ -21,7 +22,13 @@ const LanguageConfig = [
   }
 ];
 
-export const AppSettings: FC = () => {
+interface Props {
+  className?: string;
+}
+
+function AppSettings ({ className = '' }: Props): React.ReactElement<Props> | null {
+
+// export const AppSettings: FC = () => {
   const {
     changeEndpoint,
     closeSetting,
@@ -42,8 +49,9 @@ export const AppSettings: FC = () => {
   }, [setLanguage]);
 
   return (
+    // <div className={className}>
     <Drawer
-      className={classes.root}
+      className={className}
       closeIcon={<CloseOutlined />}
       onClose={closeSetting}
       placement='left'
@@ -51,15 +59,15 @@ export const AppSettings: FC = () => {
       width={520}
     >
       <div>
-        <div className={classes.settingItem}>
-          <p className={classes.title}>Select Network</p>
-          <div className={classes.settingContent}>
-            <ul className={classes.list}>
+        <div className='settingItem'>
+          <p className='title'>Select Network</p>
+          <div className='settingContent'>
+            <ul className='list'>
               {
                 DEFAULT_ENDPOINTS.testnet.map((config) => {
                   return (
                     <li
-                      className={classes.listItem}
+                      className='listItem'
                       key={`endpoint-${config.url}`}
                       onClick={(): void => handleEndpoint(config.url)}
                     >
@@ -74,15 +82,15 @@ export const AppSettings: FC = () => {
             </ul>
           </div>
         </div>
-        <div className={classes.settingItem}>
-          <p className={classes.title}>Language</p>
-          <div className={classes.settingContent}>
-            <ul className={classes.list}>
+        <div className='settingItem'>
+          <p className='title'>Language</p>
+          <div className='settingContent'>
+            <ul className='list'>
               {
                 LanguageConfig.map((config) => {
                   return (
                     <li
-                      className={classes.listItem}
+                      className='listItem'
                       key={`language-${config.value}`}
                       onClick={(): void => handleLanguage(config.value)}
                     >
@@ -99,5 +107,46 @@ export const AppSettings: FC = () => {
         </div>
       </div>
     </Drawer>
+    // </div>
   );
-};
+}
+
+export default React.memo(styled(AppSettings)`
+  :global(.ant-drawer-body) {
+    overflow: hidden;
+  }
+
+  :global(.ant-drawer-content-wrapper) {
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    overflow: hidden;
+  }
+
+  .settingItem {
+    margin-top: 24px;
+
+    .title {
+      margin-bottom: 12px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .list {
+      list-style: none;
+    }
+
+    .listItem {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 16px;
+      margin: 0 -16px;
+      font-size: 18px;
+      cursor: pointer;
+
+      &:hover {
+        background-image: linear-gradient(90deg, #E5EAFF 0%, #F5F6FA 100%);
+      }
+    }
+  }
+`);
+

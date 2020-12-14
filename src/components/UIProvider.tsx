@@ -1,8 +1,8 @@
 import React, { FC, useState } from 'react';
 
 import 'antd/dist/antd.css';
-import 'semantic-ui-css/semantic.min.css';
-import './styles/index.scss';
+// import 'semantic-ui-css/semantic.min.css';
+// import './styles/index.scss';
 import './styles/global.css';
 import { BareProps } from './types';
 
