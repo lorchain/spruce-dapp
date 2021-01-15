@@ -2,7 +2,16 @@ import { ApiOptions } from '@polkadot/api/types';
 
 const spruceTypes = {
   Address: 'AccountId',
-  LookupSource: 'AccountId'
+  LookupSource: 'AccountId',
+  TokenId: 'u64',
+  TokenBalance: 'u128',
+  CommodityId: 'u64',
+  TaoId: 'u64',
+  ExchangeId: 'u64',
+  CurrencyId: 'u64',
+  CollectionId: 'u64',
+  AssetId: 'u64',
+  NftIndex: 'u64',
 };
 
 const spruceRpc = {};

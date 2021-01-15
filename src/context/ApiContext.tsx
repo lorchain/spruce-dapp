@@ -33,7 +33,6 @@ interface Props {
 export const ApiProvider: FC<Props> = ({
   children
 }) => {
-  console.log('api provider');
   // api instance
   const [api, setApi] = useState<ApiPromise>({} as ApiPromise);
 
@@ -47,15 +46,8 @@ export const ApiProvider: FC<Props> = ({
   // const apiSubscriber = useRef<Subscription>();
 
   const init = useCallback((endpoint: string, allEndpoints: string[]) => {
-    console.log('111');
-    console.log('api', api);
+    console.log('ApiContext init, api: ', api);
     // if (apiSubscriber.current) return;
-    // if (api) {
-    //   return;
-    // }
-    console.log('222');
-    console.log('endpoint', endpoint);
-    console.log('allEndpoints', allEndpoints);
 
     const provider = new WsProvider([endpoint, ...allEndpoints]);
 

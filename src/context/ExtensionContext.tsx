@@ -3,13 +3,28 @@ import { isNumber } from 'lodash';
 import { InjectedAccount, InjectedExtension, MetadataDef } from '@polkadot/extension-inject/types';
 // import { ApiRx } from '@polkadot/api';
 import { ApiPromise } from '@polkadot/api';
-import { web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
+import keyring from '@polkadot/ui-keyring';
 // import { options } from '@acala-network/api';
 import { options } from '../config/network';
 
 import { NoAccounts, NoExtensions, SelectAccount, UploadMetadata } from '../components';
 import { useModal, useApi, useStorage } from '../hooks';
 
+interface InjectedAccountExt {
+  address: string;
+  meta: {
+    name: string;
+    source: string;
+    whenCreated: number;
+  };
+}
+
+interface ApiState {
+  hasInjectedAccounts: boolean;
+  isApiReady: boolean;
+  isDevelopment: boolean;
+}
 
 type AddressBook = {
   address: string;
@@ -17,7 +32,7 @@ type AddressBook = {
 }[]
 
 export interface ExtensionData {
-  isReady: boolean;
+  isAppReady: boolean;
   accounts?: InjectedAccount[];
   authRequired: boolean;
   active?: InjectedAccount;
@@ -30,14 +45,48 @@ export interface ExtensionData {
 
 export const ExtensionContext = createContext<ExtensionData>({} as any);
 
-async function getExtensions (api: ApiPromise, appName: string): Promise<InjectedExtension> {
-  const extensions = await web3Enable(appName);
+function isKeyringLoaded () {
+  try {
+    return !!keyring.keyring;
+  } catch {
+    return false;
+  }
+}
 
-  if (extensions.length === 0) throw new Error('no_extensions');
+async function loadAccounts(api: ApiPromise, injectedPromise: Promise<InjectedExtension[]>): Promise<ApiState> {
+  const [systemChainType, injectedAccounts] = await Promise.all([
+    api.rpc.system.chainType(),
+    injectedPromise
+      .then(() => web3Accounts())
+      .then((accounts) => accounts.map(({ address, meta }, whenCreated): InjectedAccountExt => ({
+        address,
+        meta: {
+          ...meta,
+          name: `${meta.name || 'unknown'} (${meta.source === 'polkadot-js' ? 'extension' : meta.source})`,
+          whenCreated
+        }
+      })))
+      .catch((error): InjectedAccountExt[] => {
+        console.error('web3Enable', error);
 
-  const currentExtensions = extensions[0];
+        return [];
+      })
+    ]);
 
-  return currentExtensions;
+    console.log('systemChainType', systemChainType);
+    const isDevelopment = systemChainType.isDevelopment || systemChainType.isLocal;
+    console.log('isDevelopment111', isDevelopment);
+
+    isKeyringLoaded() || keyring.loadAll({
+      genesisHash: api.genesisHash,
+      isDevelopment
+    }, injectedAccounts);
+
+    return {
+      hasInjectedAccounts: injectedAccounts.length !== 0,
+      isApiReady: true,
+      isDevelopment,
+    };
 }
 
 interface AccountProviderProps {
@@ -51,7 +100,8 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
   children
 }) => {
   const { api } = useApi();
-  const [isReady, setIsReady] = useState<boolean>(authRequired || false);
+  const [state, setState] = useState<ApiState>({ hasInjectedAccounts: false, isApiReady: false } as unknown as ApiState);
+  const [isAppReady, setIsAppReady] = useState<boolean>(authRequired || false);
   const [active, setActive] = useState<InjectedAccount | undefined>();
   const [accounts, setAccounts] = useState<InjectedAccount[]>([]);
   const [addressBook, setAddressBook] = useState<AddressBook>([]);
@@ -118,7 +168,7 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
 
       if (account) {
         api.setSigner(injector.signer);
-        setIsReady(true);
+        setIsAppReady(true);
         setActive(account);
         setStorage(`${appName}_active_account`, address);
         closeSelectAccount();
@@ -126,9 +176,9 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
         throw new Error('could not found the address in the extension');
       }
     } catch (e) {
-      setIsReady(false);
+      setIsAppReady(false);
     }
-  }, [api, appName, setIsReady, setStorage, extension, accounts, closeSelectAccount]);
+  }, [api, appName, setIsAppReady, setStorage, extension, accounts, closeSelectAccount]);
 
   const addToAddressBook = useCallback((data: { address: string; name?: string }) => {
     const newAddressbook = [...addressBook, data].reduce((acc, cur) => {
@@ -170,11 +220,23 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
   useEffect(() => {
     if (!api.isConnected) return;
 
-    getExtensions(api, appName).then((extension) => {
-      setExtension(extension);
-    }).catch(() => {
-      setErrorStatus({ noExtension: true });
-    });
+    const injectedPromise = web3Enable(appName);
+
+    injectedPromise
+      .then((extensions) => {
+        if (extensions.length === 0) throw new Error('no_extensions');
+        setExtension(extensions[0]);
+      })
+      .catch(() => {
+        setErrorStatus({ noExtension: true });
+      });
+
+    loadAccounts(api, injectedPromise)
+      .then(setState)
+      .catch(() => {
+        setErrorStatus({ noAccount: true });
+      });
+
   }, [api, triggerSignal, setExtension, setErrorStatus, appName]);
 
   // check if need upload metadata and subscribe accounts
@@ -241,16 +303,17 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
   }, [accounts, setAddressBook, getStorage, appName]);
 
   const data = useMemo(() => ({
+    ...state,
     accounts,
     active,
     addToAddressBook,
     addressBook,
     authRequired,
     closeSelectAccount,
-    isReady,
+    isAppReady,
     openSelectAccount,
     selectAccountStatus
-  }), [accounts, active, isReady, authRequired, openSelectAccount, closeSelectAccount, addressBook, addToAddressBook, selectAccountStatus]);
+  }), [state, accounts, active, isAppReady, authRequired, openSelectAccount, closeSelectAccount, addressBook, addToAddressBook, selectAccountStatus]);
 
   return (
     <ExtensionContext.Provider value={data}>

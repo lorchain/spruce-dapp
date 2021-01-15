@@ -1,60 +1,50 @@
-// import React, { useEffect, useContext } from 'react';
-// import { Select } from 'antd';
-// import Identicon from '@polkadot/react-identicon';
-// // import useApi from '../hooks/useApi';
-// import { useApi } from '../hooks';
-// import { AccountContext } from '../context/AccountContext';
-// import shorten from '../utils/address';
+import React, {useEffect, useState} from 'react';
+import Identicon from '@polkadot/react-identicon';
+import keyring from '@polkadot/ui-keyring';
+import { Select } from 'antd';
 
 
-// function Main () {
-//   const { keyring } = useApi();
-//   const { account, setAccount } = useContext(AccountContext);
+function AccountSelector () {
+  const [ account, setAccount ] = useState('');
 
-//   // Get the list of accounts we possess the private key for
-//   const keyringOptions = keyring.getPairs().map((account: any) => ({
-//     key: account.address,
-//     value: account.address,
-//     label: shorten(account.address),
-//     icon: <Identicon value={account.address} theme={'jdenticon'} size={20} style={{ paddingRight: 10}}/>
-//   }));
+  const keyringOptions = keyring.getAccounts().map((item) => ({
+    key: item.address,
+    value: item.address,
+    label: item.meta.name,
+    icon: <Identicon value={item.address} theme={'jdenticon'} size={20} style={{ paddingRight: 10}}/>
+  }));
 
-//   const initialAddress =
-//     keyringOptions.length > 0 ? keyringOptions[0].value : '';
+  const initialAddress = keyringOptions.length > 0 ? keyringOptions[0].value : '';
 
-//   // Set the initial address
-//   useEffect(() => {
-//     setAccount(initialAddress);
-//   }, [initialAddress, setAccount]);
+  // Set the initial address
+  useEffect(() => {
+    setAccount(initialAddress);
+  }, [initialAddress, setAccount]);
 
-//   const onChange = (address: any) => {
-//     // Update state with new account address
-//     setAccount(address);
-//   };
+  const onChange = (address: string) => {
+    console.log('address', address);
+    // Update state with new account address
+    setAccount(address);
+  };
 
-//   return (
-//     <div>
-//       <Select
-//         style={{ width: 200 }}
-//         bordered={false}
-//         onChange={onChange}
-//         value={account}
-//       >
-//         {
-//           keyringOptions.map((keyring: any) => (
-//             <Select.Option value={keyring.account} key={keyring.key}>
-//               {keyring.icon} {keyring.label}
-//             </Select.Option>
-//           ))
-//         }
-//       </Select>
-//     </div>
-//   );
-// }
+  return (
+    <div>
+      <Select
+        style={{ width: 300 }}
+        bordered={false}
+        onChange={onChange}
+        value={account}
+      >
+        {
+          keyringOptions.map((keyring: any) => (
+            <Select.Option value={keyring.account} key={keyring.key}>
+              {keyring.icon} {keyring.label}
+            </Select.Option>
+          ))
+        }
+      </Select>
+    </div>
+  );
+}
 
-// export default function AccountSelector () {
-//   const { api, keyring } = useApi();
-//   return keyring.getPairs && api.query ? <Main /> : null;
-// }
-
-export {};
+export default AccountSelector;
